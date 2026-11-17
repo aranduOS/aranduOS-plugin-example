@@ -1,6 +1,6 @@
-# mira-commerce-plugin-example
+# aranduOS-plugin-example
 
-**Template oficial de plugin do [Mira Commerce](https://mira-dev.tech).**
+**Template oficial de plugin do [aranduOS](https://aranduos.com).**
 Um programa de fidelidade mínimo, comentado linha a linha, que você clona,
 roda em 30 segundos e transforma no seu próprio plugin.
 
@@ -25,8 +25,8 @@ ser persistido).
 ## Comece em 30 segundos
 
 ```bash
-git clone https://github.com/mira-dev-tech/mira-commerce-plugin-example
-cd mira-commerce-plugin-example
+git clone https://github.com/aranduOS/aranduOS-plugin-example
+cd aranduOS-plugin-example
 go test ./...        # funciona direto — o SDK está vendorado, zero setup
 ```
 
@@ -60,7 +60,7 @@ Se o processo morrer no meio de um hook, o resultado é `plugin_failure`. Não h
 
 ## Crie o seu plugin a partir deste template
 
-1. **Fork/clone** com o nome `mira-commerce-plugin-<seu-id>`.
+1. **Fork/clone** com o nome `aranduOS-plugin-<seu-id>`.
 2. **Renomeie a identidade**: `id` no `Meta()` e no `manifest.yaml`, o nome do
    pacote, o prefixo de env (`EXAMPLE_LOYALTY_*` → `SEU_PLUGIN_*`).
 3. **Escolha hooks/eventos** no catálogo do SDK e **declare no manifest** — o
@@ -97,8 +97,8 @@ exige um ambiente da plataforma. O mapa completo:
 | **Contrato go-plugin** — o binário fala o protocolo | Sua máquina | `go build -o bin/... ./cmd/... && ./bin/... --commerce-ext-handshake` → `commerce-ext-ok` |
 | **Manifest** — capacidades declaradas = registradas | Sua máquina | teste `TestRegisterDeclaresManifestCapabilities` |
 | **Integração local** — cadeia de prioridades, timeout de 300ms, semântica do `quote_adjust`, at-least-once de eventos | Sua máquina | mini-host [`plugintest`](https://github.com/mira-dev-tech/commerce-ext/tree/main/plugintest) — ver [`integration_test.go`](integration_test.go) |
-| **Host real** — a release gravada a partir da tag, numa empresa do registo | Workflow da Mirá | A tag `vX.Y.Z` é o pedido. A Mirá constrói esse SHA e grava o digest. O pin fica `installing` até o role existir |
-| **Aceite de negócio** — efeito num checkout de verdade | Staging Mirá | Pedido de teste num tenant de staging; valida desconto/bloqueio/pontos fim a fim |
+| **Host real** — a release gravada a partir da tag, numa empresa do registo | Workflow da plataforma | A tag `vX.Y.Z` é o pedido. A plataforma constrói esse SHA e grava o digest. O pin fica `installing` até o role existir |
+| **Aceite de negócio** — efeito num checkout de verdade | staging da plataforma | Pedido de teste num tenant de staging; valida desconto/bloqueio/pontos fim a fim |
 
 Regra prática: **antes de pedir um slot em staging, unidade + integração
 local (`plugintest`) + handshake + manifest têm que estar verdes** — são as
@@ -110,11 +110,11 @@ Tudo pelo GitHub. Não há painel neste caminho.
 
 1. PR neste repo (ou no fork). `go test ./...` e o handshake verdes.
 2. Tag `vX.Y.Z` no commit verde. O que se entrega é o fonte nesse SHA, não um binário.
-3. O workflow da Mirá clona a tag, constrói a imagem e grava a release com o digest dele. A primeira versão de um `plugin_id` espera review no environment. A sessão de parceiro não consegue gravar a release.
+3. O workflow da plataforma clona a tag, constrói a imagem e grava a release com o digest dele. A primeira versão de um `plugin_id` espera review no environment. A sessão de parceiro não consegue gravar a release.
 4. Outro disparo liga a release a uma empresa que o registo diga ser deste parceiro. O pin fica `installing`.
-5. A Mirá cria o role `ext_<id>` e activa. Sem o role, o pin não passa de `installing`. Suspender tira a release de todas as empresas e não reinicia a API.
+5. A plataforma cria o role `ext_<id>` e activa. Sem o role, o pin não passa de `installing`. Suspender tira a release de todas as empresas e não reinicia a API.
 
-As razões de cada passo estão no [`AGENTS.md`](AGENTS.md). Plugins da própria Mirá, compilados dentro da API, são outro caminho e não se fazem a partir deste template.
+As razões de cada passo estão no [`AGENTS.md`](AGENTS.md). Plugins da própria plataforma, compilados dentro da API, são outro caminho e não se fazem a partir deste template.
 
 ### Regras de versão
 
@@ -147,10 +147,10 @@ go test ./...
 ## Sobre este repositório
 
 Código de **exemplo didático**, fornecido como está. Forks são bem-vindos para
-criar seus próprios plugins; a escrita aqui é restrita à equipe Mirá para o
+criar seus próprios plugins; a escrita aqui é restrita à equipe da plataforma para o
 template permanecer um ponto de partida estável.
 
-## Ecossistema Mirá Commerce
+## Ecossistema
 
 📚 **Documentação pública: [docs.mira-dev.tech](https://docs.mira-dev.tech)**
 
@@ -159,6 +159,6 @@ template permanecer um ponto de partida estável.
 | [mira-commerce-sdk-js](https://github.com/mira-dev-tech/mira-commerce-sdk-js) | SDKs oficiais JS/TS — `client-sdk` (API tipada) e `checkout-sdk` (checkout headless) |
 | [mira-commerce-storefront-guide](https://github.com/mira-dev-tech/mira-commerce-storefront-guide) | Guia oficial para construir um storefront (vitrine + checkout) sobre as APIs |
 | [commerce-ext](https://github.com/mira-dev-tech/commerce-ext) | SDK público de plugins — Extension Protocol |
-| [mira-commerce-plugin-example](https://github.com/mira-dev-tech/mira-commerce-plugin-example) | Template de plugin — exemplo didático (hooks, eventos, manifest, go-plugin) |
-| [mira-commerce-plugin-payment](https://github.com/mira-dev-tech/mira-commerce-plugin-payment) | Template de plugin de pagamento e antifraude (roteamento, 3DS, velocity) |
-| [mira-commerce-plugin-shipping](https://github.com/mira-dev-tech/mira-commerce-plugin-shipping) | Template de plugin de logística/frete (cotação externa, cache, circuit breaker) |
+| [aranduOS-plugin-example](https://github.com/aranduOS/aranduOS-plugin-example) | Template de plugin — exemplo didático (hooks, eventos, manifest, go-plugin) |
+| [aranduOS-plugin-payment](https://github.com/aranduOS/aranduOS-plugin-payment) | Template de plugin de pagamento e antifraude (roteamento, 3DS, velocity) |
+| [aranduOS-plugin-shipping](https://github.com/aranduOS/aranduOS-plugin-shipping) | Template de plugin de logística/frete (cotação externa, cache, circuit breaker) |

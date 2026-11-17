@@ -11,8 +11,8 @@ a partir dele. Cada regra tem a razão. Não as contorne para «ficar pronto».
 
 ## Regras
 
-1. Não clone `mira-arandu-core` nem `mira-commerce-core`, e não copie este
-   pacote para `extensions/` de lá. A razão: plugins escritos pela Mirá
+1. Não clone o monorepo da plataforma, e não copie este
+   pacote para `extensions/` de lá. A razão: plugins escritos pela plataforma
    (`forms`, `care-record`, `condominio`) compilam dentro da API. O de
    parceiro é outro processo, noutro pod, e não herda a credencial da API.
 
@@ -36,7 +36,7 @@ a partir dele. Cada regra tem a razão. Não as contorne para «ficar pronto».
 
 5. Não chame `POST /platform/plugin-releases` com o token de parceiro. A
    sessão de parceiro leva 401 nessa rota. A razão: quem grava o digest é o
-   workflow da Mirá, a partir da imagem que ele próprio construiu da tag.
+   workflow da plataforma, a partir da imagem que ele próprio construiu da tag.
    Um digest escrito neste repo não entra.
 
 6. Não marque o pin `active` e não instale uma empresa que o registo não
@@ -57,14 +57,14 @@ a partir dele. Cada regra tem a razão. Não as contorne para «ficar pronto».
 
 2. Tag `vX.Y.Z` no commit verde. Não se faz upload de binário.
 
-3. O workflow da Mirá clona esse SHA, constrói, calcula o digest e grava a
+3. O workflow da plataforma clona esse SHA, constrói, calcula o digest e grava a
    release com o `partner_id` ligado à org de GitHub. A primeira versão de
    um `plugin_id` novo espera review nesse environment. A seguinte, do mesmo
    id e do mesmo parceiro, não. A mesma versão não se regrava.
 
 4. Ligar a uma empresa é um `workflow_dispatch` com o slug e o token de
-   parceiro. O pin fica `installing` até a Mirá criar o role `ext_<id>` e
-   activar. Suspender é disparo da Mirá e não reinicia a API.
+   parceiro. O pin fica `installing` até a plataforma criar o role `ext_<id>` e
+   activar. Suspender é disparo da plataforma e não reinicia a API.
 
 O `vendor/` existe para o CI correr sem credencial de módulo. Não o apague.
 Para subir o SDK: `go get github.com/mira-dev-tech/commerce-ext@vX.Y.Z`,
