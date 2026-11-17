@@ -38,36 +38,25 @@ go test ./...        # funciona direto — o SDK está vendorado, zero setup
 | [`plugin_test.go`](plugin_test.go) | Testes unitários usando só a superfície do SDK — inclusive o teste que trava a paridade entre `Register` e o `manifest.yaml` |
 | [`integration_test.go`](integration_test.go) | Integração local com o mini-host `plugintest`: cadeia, timeout, at-least-once — sem precisar do core |
 | [`manifest.yaml`](manifest.yaml) | Como declarar capacidades (hooks/eventos) e compatibilidade de versão |
-| [`cmd/example-loyalty/main.go`](cmd/example-loyalty/main.go) | Como empacotar o plugin como **binário externo** (go-plugin/RPC) — são 3 linhas |
+| [`cmd/example-loyalty/main.go`](cmd/example-loyalty/main.go) | O `main`: `commerceext.Serve`. Três linhas. Não é a API a arrancar o processo |
+| [`AGENTS.md`](AGENTS.md) | Regras para quem (ou o agente de quem) for publicar este plugin, e a razão de cada uma |
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | CI mínimo: vet + test + build + handshake |
 
-## Os dois modos de rodar um plugin
+## Como o binário sobe
 
-### Modo 1 — in-process (compilado dentro do core)
-
-Para plugins mantidos junto da plataforma: o pacote é copiado para o monorepo
-do core (`extensions/<id>`) e registrado no loader. O manifest usa
-`runtime.type: in-process`. *(Requer acesso ao repositório interno do core.)*
-
-### Modo 2 — binário externo (go-plugin/RPC)
-
-Para código que **não** deve ser compilado no core — ex.: plugin de
-cliente/parceiro. O core sobe o seu binário como processo filho e conversa por
-RPC; o binário importa **apenas** o SDK público:
+Este template é o formato do parceiro. Não se copia para o monorepo e a API
+não arranca o processo. O `main` chama `commerceext.Serve`. No cluster a
+única env é `COMMERCE_EXT_HOST`: o host disca o RPC, o plugin não liga ao
+Postgres e não vê o mapa de tenants.
 
 ```bash
 go build -o bin/example-loyalty ./cmd/example-loyalty
 
-# probe do protocolo — deve imprimir: commerce-ext-ok
+# prova do protocolo, no CI — imprime commerce-ext-ok e sai
 ./bin/example-loyalty --commerce-ext-handshake
-
-# no deploy do core, aponte o manifest deste plugin:
-MIRA_MANIFEST_PATH=/caminho/para/manifest.yaml <processo do core>
 ```
 
-O host valida o handshake, registra os hooks enumerados pelo binário e faz a
-ponte de cada chamada por RPC. Se o processo do plugin morrer, os hooks
-degradam com código explícito `plugin_failure` — nunca um bloqueio silencioso.
+Se o processo morrer no meio de um hook, o resultado é `plugin_failure`. Não há manifest a remover nem restart da API para desligar: suspender a release tira o pin.
 
 ## Crie o seu plugin a partir deste template
 
@@ -108,7 +97,7 @@ exige um ambiente da plataforma. O mapa completo:
 | **Contrato go-plugin** — o binário fala o protocolo | Sua máquina | `go build -o bin/... ./cmd/... && ./bin/... --commerce-ext-handshake` → `commerce-ext-ok` |
 | **Manifest** — capacidades declaradas = registradas | Sua máquina | teste `TestRegisterDeclaresManifestCapabilities` |
 | **Integração local** — cadeia de prioridades, timeout de 300ms, semântica do `quote_adjust`, at-least-once de eventos | Sua máquina | mini-host [`plugintest`](https://github.com/mira-dev-tech/commerce-ext/tree/main/plugintest) — ver [`integration_test.go`](integration_test.go) |
-| **Integração com o host real** — workflow, outbox durável, dados reais | Ambiente Mirá (dev) | O plugin é carregado num deploy de desenvolvimento via `MIRA_MANIFEST_PATH`; devs internos rodam `make dev-api` no core |
+| **Host real** — a release gravada a partir da tag, numa empresa do registo | Workflow da Mirá | A tag `vX.Y.Z` é o pedido. A Mirá constrói esse SHA e grava o digest. O pin fica `installing` até o role existir |
 | **Aceite de negócio** — efeito num checkout de verdade | Staging Mirá | Pedido de teste num tenant de staging; valida desconto/bloqueio/pontos fim a fim |
 
 Regra prática: **antes de pedir um slot em staging, unidade + integração
@@ -117,35 +106,15 @@ quatro coisas que você consegue provar sozinho.
 
 ## Colocando em produção
 
-### Fluxo A — dev interno (in-process, o padrão hoje)
+Tudo pelo GitHub. Não há painel neste caminho.
 
-1. Desenvolva aqui no template (loop rápido, sem depender do monorepo).
-2. Quando estável, copie o pacote para `extensions/<id>` no core e registre no
-   loader do Extension Host (plugins que mudam dinheiro ficam atrás de flag,
-   como o `MIRA_EXAMPLE_PLUGIN=1` deste exemplo).
-3. Abra PR no core com o checklist: manifest ↔ `Register` em paridade, teste de
-   integração pelo host, timeout/idempotência documentados, persistência em
-   schema `ext_<plugin>`, linha na tabela de extensões da doc.
-4. Merge → deploy pelo workflow da API → confirme no log:
-   `ext: plugins loaded [... <seu-id>]`.
-5. **Rollback**: desligar a flag (ou remover do loader) + redeploy. Por isso
-   todo plugin novo nasce atrás de flag.
+1. PR neste repo (ou no fork). `go test ./...` e o handshake verdes.
+2. Tag `vX.Y.Z` no commit verde. O que se entrega é o fonte nesse SHA, não um binário.
+3. O workflow da Mirá clona a tag, constrói a imagem e grava a release com o digest dele. A primeira versão de um `plugin_id` espera review no environment. A sessão de parceiro não consegue gravar a release.
+4. Outro disparo liga a release a uma empresa que o registo diga ser deste parceiro. O pin fica `installing`.
+5. A Mirá cria o role `ext_<id>` e activa. Sem o role, o pin não passa de `installing`. Suspender tira a release de todas as empresas e não reinicia a API.
 
-### Fluxo B — parceiro (go-plugin externo, desenhado para o futuro)
-
-1. Parceiro desenvolve num fork deste template e entrega **código-fonte
-   versionado (repo + tag)** + `manifest.yaml` — não um binário opaco: a Mirá
-   **audita e builda a partir do fonte**. Binário de terceiro sem auditoria não
-   roda junto do core, nunca.
-2. Validação Mirá: revisão de código, `VerifyPluginManifest`, carga num
-   ambiente dev (`MIRA_MANIFEST_PATH`) e cenários de aceite combinados.
-3. Staging com dados de teste do tenant do parceiro; aprovação de negócio.
-4. Produção: o manifest entra **pinado por versão** no deploy do tenant. O
-   `compatibleCore` (semver) protege contra upgrade de core incompatível.
-5. Operação: falha de plugin aparece no log do core com código explícito
-   (`plugin_failure` / `ext/rpc: hook ... failed`) — nunca silenciosa. **Kill
-   switch**: remover o manifest do deploy + restart; o core volta ao
-   comportamento baseline na hora.
+As razões de cada passo estão no [`AGENTS.md`](AGENTS.md). Plugins da própria Mirá, compilados dentro da API, são outro caminho e não se fazem a partir deste template.
 
 ### Regras de versão
 
