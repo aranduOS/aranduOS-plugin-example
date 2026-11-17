@@ -21,9 +21,8 @@
 //   - Config vem do Runtime (manifest/host) com fallback a env — nunca
 //     hardcode de valores de negócio.
 //
-// Guia passo-a-passo: docs/plugin-example.md no mira-commerce-core.
-// Este repositório é o TEMPLATE standalone — veja o README para os dois modos
-// de carga (in-process no core ou binário externo go-plugin via cmd/).
+// Publicar: AGENTS.md. Este repo não se copia para o monorepo.
+// O processo é o cmd/, e a API não o arranca.
 package exampleloyalty
 
 import (

@@ -1,10 +1,10 @@
-// Command example-loyalty empacota o plugin como BINÁRIO EXTERNO (go-plugin):
-// o Extension Host do core sobe este processo e conversa com ele por RPC,
-// sem compilar o código do plugin dentro do core.
+// Command example-loyalty é o processo do plugin de parceiro.
+// Não é filho da API e não se carrega com MIRA_MANIFEST_PATH.
+// No cluster a única env é COMMERCE_EXT_HOST; o host disca o RPC.
 //
 // Build:  go build -o bin/example-loyalty ./cmd/example-loyalty
-// Teste:  ./bin/example-loyalty --commerce-ext-handshake   → imprime "commerce-ext-ok"
-// Carga:  manifest.yaml (runtime.type go-plugin) + MIRA_MANIFEST_PATH no core.
+// Prova:  ./bin/example-loyalty --commerce-ext-handshake   → imprime "commerce-ext-ok"
+// Escuta: ./bin/example-loyalty --commerce-ext-rpc 0.0.0.0:8092
 package main
 
 import (
