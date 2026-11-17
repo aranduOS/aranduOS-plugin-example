@@ -47,9 +47,9 @@ type Plugin struct {
 	logger commerceext.Logger
 
 	// Config imutável após Init — sem lock.
-	minSubtotal float32
-	discountPct float32
-	orderCap    float32
+	minSubtotal float64
+	discountPct float64
+	orderCap    float64
 
 	// Estado do handler de evento. ATENÇÃO: em memória SÓ porque este plugin é
 	// didático — estado real de plugin vai para Postgres no schema
@@ -175,24 +175,24 @@ func (p *Plugin) Points() int64 {
 }
 
 // configFloat resolve uma chave de config: Runtime.Config → env → default.
-func configFloat(cfg map[string]any, key, envKey string, def float32) float32 {
+func configFloat(cfg map[string]any, key, envKey string, def float64) float64 {
 	if cfg != nil {
 		switch v := cfg[key].(type) {
 		case float64:
-			return float32(v)
-		case float32:
 			return v
+		case float32:
+			return float64(v)
 		case int:
-			return float32(v)
+			return float64(v)
 		case string:
-			if f, err := strconv.ParseFloat(v, 32); err == nil {
-				return float32(f)
+			if f, err := strconv.ParseFloat(v, 64); err == nil {
+				return f
 			}
 		}
 	}
 	if raw := os.Getenv(envKey); raw != "" {
-		if f, err := strconv.ParseFloat(raw, 32); err == nil && f >= 0 {
-			return float32(f)
+		if f, err := strconv.ParseFloat(raw, 64); err == nil && f >= 0 {
+			return f
 		}
 	}
 	return def
