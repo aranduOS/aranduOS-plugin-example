@@ -10,7 +10,7 @@ package main
 import (
 	commerceext "github.com/mira-dev-tech/commerce-ext"
 
-	exampleloyalty "github.com/mira-dev-tech/mira-commerce-plugin-example"
+	exampleloyalty "github.com/aranduOS/aranduOS-plugin-example"
 )
 
 func main() {

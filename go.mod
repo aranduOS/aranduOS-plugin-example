@@ -1,4 +1,4 @@
-module github.com/mira-dev-tech/mira-commerce-plugin-example
+module github.com/aranduOS/aranduOS-plugin-example
 
 go 1.26.5
 

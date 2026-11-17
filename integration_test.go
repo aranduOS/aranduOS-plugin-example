@@ -3,7 +3,7 @@ package exampleloyalty
 // Teste de INTEGRAÇÃO LOCAL com o mini-host `plugintest`: exercita o plugin
 // pela CADEIA (prioridades, timeout, semântica do quote_adjust e entrega
 // at-least-once de eventos) sem precisar do core. É a etapa entre o teste
-// unitário e o aceite em ambiente Mirá — rode antes de pedir slot em staging.
+// unitário e o aceite em ambiente da plataforma — rode antes de pedir slot em staging.
 
 import (
 	"context"

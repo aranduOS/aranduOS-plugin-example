@@ -9,7 +9,7 @@
 // Regras do protocolo que este arquivo demonstra na prática:
 //
 //   - Plugin importa SOMENTE o módulo público commerce-ext — nunca
-//     mira-commerce-core/internal/... (anti-pattern, ver ARCHITECTURE §10).
+//     um pacote interno da plataforma.
 //   - Hooks são síncronos, com timeout de 300ms e panic-safe no host: se o
 //     handler estourar, o host degrada (deny com CodePluginFailure) — por isso
 //     handlers devem ser rápidos e sem I/O bloqueante.
