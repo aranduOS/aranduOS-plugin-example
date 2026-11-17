@@ -58,9 +58,9 @@ a partir dele. Cada regra tem a razão. Não as contorne para «ficar pronto».
 2. Tag `vX.Y.Z` no commit verde. Não se faz upload de binário.
 
 3. O workflow da plataforma clona esse SHA, constrói, calcula o digest e grava a
-   release com o `partner_id` ligado à org de GitHub. A primeira versão de
-   um `plugin_id` novo espera review nesse environment. A seguinte, do mesmo
-   id e do mesmo parceiro, não. A mesma versão não se regrava.
+   release. O `partner_id` tem de estar ativo no registo dinâmico do Console.
+   Um `plugin_id` que já pertence a outro parceiro é recusado na gravação.
+   A mesma versão não se regrava.
 
 4. Ligar a uma empresa é um `workflow_dispatch` com o slug e o token de
    parceiro. O pin fica `installing` até a plataforma criar o role `ext_<id>` e

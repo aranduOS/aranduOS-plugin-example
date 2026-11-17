@@ -110,7 +110,7 @@ Tudo pelo GitHub. Não há painel neste caminho.
 
 1. PR neste repo (ou no fork). `go test ./...` e o handshake verdes.
 2. Tag `vX.Y.Z` no commit verde. O que se entrega é o fonte nesse SHA, não um binário.
-3. O workflow da plataforma clona a tag, constrói a imagem e grava a release com o digest dele. A primeira versão de um `plugin_id` espera review no environment. A sessão de parceiro não consegue gravar a release.
+3. O workflow da plataforma clona a tag, constrói a imagem e grava a release com o digest dele. O `partner_id` tem de estar ativo no registo dinâmico do Console. Um `plugin_id` de outro parceiro é recusado na gravação. A sessão de parceiro não consegue gravar a release.
 4. Outro disparo liga a release a uma empresa que o registo diga ser deste parceiro. O pin fica `installing`.
 5. A plataforma cria o role `ext_<id>` e activa. Sem o role, o pin não passa de `installing`. Suspender tira a release de todas as empresas e não reinicia a API.
 
